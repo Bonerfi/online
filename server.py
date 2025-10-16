@@ -25,8 +25,15 @@ def handle_client(conn, addr):
             data = conn.recv(4096)
             if not data:
                 break
-            update = pickle.loads(data)
+            
+            try:
+                update = pickle.loads(data)
+            except Exception as e:
+                print(f"[WARN] Non-pickle data from {addr}: {e}")
+                continue  # Skip this message
+            
             players[player_id].update(update)
+
 
             # Broadcast
             state_data = pickle.dumps(players)
@@ -41,3 +48,4 @@ def handle_client(conn, addr):
 while True:
     conn, addr = server.accept()
     threading.Thread(target=handle_client, args=(conn, addr), daemon=True).start()
+
